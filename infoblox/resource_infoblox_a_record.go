@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	ibclient "github.com/infobloxopen/infoblox-go-client"
+	"math"
+)
+
+const (
+	ttlUndef = math.MinInt32
 )
 
 func resourceARecord() *schema.Resource {
@@ -44,6 +49,7 @@ func resourceARecord() *schema.Resource {
 			"ttl": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Default:     ttlUndef,
 				Description: "TTL value for the A-record.",
 			},
 			"comment": {
@@ -64,7 +70,6 @@ func resourceARecord() *schema.Resource {
 
 func setTFFieldsForRecordA(d *schema.ResourceData, rec *ibclient.RecordA) error {
 	d.SetId(rec.Ref)
-	d.Set("ip_addr", rec.Ipv4Addr)
 
 	return nil
 }
@@ -80,13 +85,15 @@ func resourceARecordCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	var ttl uint32
-	tempVal, useTTL := d.GetOk("ttl")
-	if useTTL {
-		tempTTL := tempVal.(int)
-		if tempTTL < 0 {
-			return fmt.Errorf("TTL value must be 0 or higher")
-		}
+
+	useTTL := false
+	tempVal := d.Get("ttl")
+	tempTTL := tempVal.(int)
+	if tempTTL >= 0 {
+		useTTL = true
 		ttl = uint32(tempTTL)
+	} else if tempTTL != ttlUndef {
+			return fmt.Errorf("TTL value must be 0 or higher")
 	}
 
 	comment := d.Get("comment").(string)
@@ -166,13 +173,14 @@ func resourceARecordUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	var ttl uint32
-	tempVal, useTTL := d.GetOk("ttl")
-	if useTTL {
-		tempTTL := tempVal.(int)
-		if tempTTL < 0 {
-			return fmt.Errorf("TTL value must be 0 or higher")
-		}
+	useTTL := false
+	tempVal := d.Get("ttl")
+	tempTTL := tempVal.(int)
+	if tempTTL >= 0 {
+		useTTL = true
 		ttl = uint32(tempTTL)
+	} else if tempTTL != ttlUndef {
+		return fmt.Errorf("TTL value must be 0 or higher")
 	}
 
 	comment := d.Get("comment").(string)
