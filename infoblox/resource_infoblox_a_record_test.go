@@ -260,7 +260,7 @@ func testAccARecordIpChange(t *testing.T, prevIp *string, resPath string, mustBe
 		}
 
 		if rec.Ipv4Addr == *prevIp && !mustBeEqual {
-				return fmt.Errorf("IP address for the A-record must be different from the previous one")
+			return fmt.Errorf("IP address for the A-record must be different from the previous one")
 		}
 
 		*prevIp = rec.Ipv4Addr

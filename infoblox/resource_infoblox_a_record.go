@@ -93,7 +93,7 @@ func resourceARecordCreate(d *schema.ResourceData, m interface{}) error {
 		useTTL = true
 		ttl = uint32(tempTTL)
 	} else if tempTTL != ttlUndef {
-			return fmt.Errorf("TTL value must be 0 or higher")
+		return fmt.Errorf("TTL value must be 0 or higher")
 	}
 
 	comment := d.Get("comment").(string)
